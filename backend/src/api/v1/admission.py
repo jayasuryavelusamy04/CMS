@@ -1,16 +1,16 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
-from core.deps import get_db, get_current_user
-from schemas.student import StudentCreate, StudentResponse, StudentList, StudentUpdate
-from schemas.student_document import StudentDocumentCreate, StudentDocumentResponse
-from crud.student import student
-from models.student import AdmissionStatus
+from src.core.deps import get_db, get_current_user
+from src.schemas.student import StudentCreate, Student, StudentUpdate, StudentBase
+from src.schemas.student_document import StudentDocumentCreate, StudentDocumentResponse
+from src.crud.student import student
+from src.models.student import AdmissionStatus
 import json
 
 router = APIRouter()
 
-@router.post("/students/", response_model=StudentResponse)
+@router.post("/students/", response_model=Student)
 def create_student(
     *,
     db: Session = Depends(get_db),
@@ -20,7 +20,7 @@ def create_student(
     """Create new student admission"""
     return student.create_with_guardians(db=db, obj_in=student_in)
 
-@router.get("/students/", response_model=StudentList)
+@router.get("/students/", response_model=List[Student])
 def list_students(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -44,7 +44,7 @@ def list_students(
     )
     return {"total": total, "items": students}
 
-@router.get("/students/{student_id}", response_model=StudentResponse)
+@router.get("/students/{student_id}", response_model=Student)
 def get_student(
     *,
     db: Session = Depends(get_db),
@@ -57,7 +57,7 @@ def get_student(
         raise HTTPException(status_code=404, detail="Student not found")
     return db_student
 
-@router.put("/students/{student_id}", response_model=StudentResponse)
+@router.put("/students/{student_id}", response_model=Student)
 def update_student(
     *,
     db: Session = Depends(get_db),

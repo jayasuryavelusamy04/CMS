@@ -1,45 +1,37 @@
-from typing import List, Optional
-from datetime import date, datetime
-from pydantic import BaseModel, EmailStr, Field
-from typing_extensions import Annotated
-from .guardian import GuardianCreate, GuardianResponse
-from .class_section import ClassSectionResponse
+from typing import Optional, List
+from datetime import datetime
+from pydantic import BaseModel, EmailStr
+from .guardian import Guardian
 
 class StudentBase(BaseModel):
-    first_name: Annotated[str, Field(min_length=1, max_length=50)]
-    middle_name: Optional[Annotated[str, Field(max_length=50)]] = None
-    last_name: Annotated[str, Field(min_length=1, max_length=50)]
-    date_of_birth: date
+    name: str
+    email: EmailStr
+    date_of_birth: datetime
     gender: str
-    contact_number: Annotated[str, Field(pattern=r'^\+?1?\d{9,15}$')]
-    email: Optional[EmailStr] = None
-    nationality: Annotated[str, Field(min_length=1, max_length=50)]
-    permanent_address: Annotated[str, Field(min_length=1, max_length=200)]
-    temporary_address: Optional[Annotated[str, Field(max_length=200)]] = None
+    address: str
+    phone_number: str
 
 class StudentCreate(StudentBase):
-    guardians: List[GuardianCreate]
+    guardian_id: int
     class_section_id: Optional[int] = None
+    password: str
 
 class StudentUpdate(StudentBase):
-    admission_status: Optional[str] = None
+    password: Optional[str] = None
+    guardian_id: Optional[int] = None
     class_section_id: Optional[int] = None
+    is_active: Optional[bool] = None
 
-class StudentResponse(StudentBase):
+class StudentInDB(StudentBase):
     id: int
-    admission_date: datetime
-    admission_status: str
+    guardian_id: int
+    class_section_id: Optional[int]
+    is_active: bool
     created_at: datetime
-    updated_at: Optional[datetime]
-    guardians: List[GuardianResponse]
-    class_section: Optional[ClassSectionResponse] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
 
-class StudentList(BaseModel):
-    total: int
-    items: List[StudentResponse]
-    
-    class Config:
-        from_attributes = True
+class Student(StudentInDB):
+    guardian: Optional[Guardian] = None

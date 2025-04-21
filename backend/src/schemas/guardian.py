@@ -1,27 +1,29 @@
 from typing import Optional
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, Field
-from typing_extensions import Annotated
+from pydantic import BaseModel, EmailStr
 
 class GuardianBase(BaseModel):
-    full_name: Annotated[str, Field(min_length=1, max_length=100)]
-    relationship: Annotated[str, Field(min_length=1, max_length=50)]
-    contact_number: Annotated[str, Field(pattern=r'^\+?1?\d{9,15}$')]
-    email: Optional[EmailStr] = None
-    occupation: Optional[Annotated[str, Field(max_length=100)]] = None
-    address: Optional[Annotated[str, Field(max_length=200)]] = None
+    name: str
+    email: EmailStr
+    phone_number: str
+    relationship: str
+    address: str
+    occupation: Optional[str] = None
 
 class GuardianCreate(GuardianBase):
     pass
 
 class GuardianUpdate(GuardianBase):
-    pass
+    is_active: Optional[bool] = None
 
-class GuardianResponse(GuardianBase):
+class GuardianInDB(GuardianBase):
     id: int
-    student_id: int
+    is_active: bool
     created_at: datetime
-    updated_at: Optional[datetime]
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
+
+class Guardian(GuardianInDB):
+    pass

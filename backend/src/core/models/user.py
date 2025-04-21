@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from sqlalchemy import Column, String, DateTime, Boolean, Enum
 import enum
-from core.database import Base
+from src.core.database import Base
 from core.models import CoreModel
 
 class UserRole(str, enum.Enum):

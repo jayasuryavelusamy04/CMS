@@ -1,6 +1,7 @@
 from typing import List, Optional
+from datetime import date, datetime
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, case
 from models.student_profile import StudentProfile, Attendance, Mark
 from models.subject import Subject, TimetableSlot
 from schemas.student_profile import (
@@ -39,22 +40,6 @@ class CRUDStudentProfile(CRUDBase[StudentProfile, StudentProfileCreate, StudentP
         *,
         obj_in: AttendanceCreate
     ) -> Attendance:
-        # Verify the student is assigned to the subject through their class
-        student_profile = self.get(db, id=obj_in.student_profile_id)
-        if not student_profile:
-            raise ValueError("Student profile not found")
-
-        # Check if subject belongs to student's class
-        subject_assigned = db.query(Subject)\
-            .join(TimetableSlot)\
-            .filter(
-                Subject.id == obj_in.subject_id,
-                TimetableSlot.class_section_id == student_profile.student.class_section_id
-            ).first()
-        
-        if not subject_assigned:
-            raise ValueError("Subject is not assigned to student's class")
-
         db_obj = Attendance(**obj_in.dict())
         db.add(db_obj)
         db.commit()
@@ -67,22 +52,6 @@ class CRUDStudentProfile(CRUDBase[StudentProfile, StudentProfileCreate, StudentP
         *,
         obj_in: MarkCreate
     ) -> Mark:
-        # Verify the student is assigned to the subject
-        student_profile = self.get(db, id=obj_in.student_profile_id)
-        if not student_profile:
-            raise ValueError("Student profile not found")
-
-        # Check if subject belongs to student's class
-        subject_assigned = db.query(Subject)\
-            .join(TimetableSlot)\
-            .filter(
-                Subject.id == obj_in.subject_id,
-                TimetableSlot.class_section_id == student_profile.student.class_section_id
-            ).first()
-        
-        if not subject_assigned:
-            raise ValueError("Subject is not assigned to student's class")
-
         db_obj = Mark(**obj_in.dict())
         db.add(db_obj)
         db.commit()
@@ -150,16 +119,16 @@ class CRUDStudentProfile(CRUDBase[StudentProfile, StudentProfileCreate, StudentP
         subject_id: int
     ) -> float:
         result = db.query(
-            func.sum(Mark.marks_obtained * Mark.weightage).label('weighted_sum'),
-            func.sum(Mark.max_marks * Mark.weightage).label('max_weighted_sum')
+            func.sum(Mark.score).label('total_score'),
+            func.sum(Mark.max_score).label('total_max_score')
         ).filter(
             Mark.student_profile_id == student_profile_id,
             Mark.subject_id == subject_id
         ).first()
 
-        if not result.max_weighted_sum:
+        if not result.total_max_score:
             return 0.0
         
-        return (result.weighted_sum / result.max_weighted_sum) * 100
+        return (result.total_score / result.total_max_score) * 100
 
 student_profile = CRUDStudentProfile(StudentProfile)

@@ -2,7 +2,7 @@ from typing import Optional, List
 from datetime import datetime
 from pydantic import BaseModel
 
-from models.student_profile import AttendanceStatus
+from src.models.student_profile import AttendanceStatus  # Updated import path
 
 class StudentProfileBase(BaseModel):
     student_id: int

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, DateTime, Enum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from models.base import Base
+from src.core.database import Base  # Updated import path
 import enum
 
 class AttendanceStatus(enum.Enum):
@@ -11,6 +11,7 @@ class AttendanceStatus(enum.Enum):
 
 class StudentProfile(Base):
     __tablename__ = "student_profiles"
+    __table_args__ = {'extend_existing': True}  # Allow table redefinition
     
     id = Column(Integer, primary_key=True, index=True)
     student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
@@ -27,6 +28,7 @@ class StudentProfile(Base):
 
 class Attendance(Base):
     __tablename__ = "attendances"
+    __table_args__ = {'extend_existing': True}  # Allow table redefinition
     
     id = Column(Integer, primary_key=True, index=True)
     student_profile_id = Column(Integer, ForeignKey("student_profiles.id"), nullable=False)
@@ -41,6 +43,7 @@ class Attendance(Base):
 
 class Mark(Base):
     __tablename__ = "marks"
+    __table_args__ = {'extend_existing': True}  # Allow table redefinition
     
     id = Column(Integer, primary_key=True, index=True)
     student_profile_id = Column(Integer, ForeignKey("student_profiles.id"), nullable=False)

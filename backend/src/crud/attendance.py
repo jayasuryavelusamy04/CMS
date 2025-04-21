@@ -4,7 +4,7 @@ from sqlalchemy import and_, or_, func
 from datetime import datetime, date
 import uuid
 
-from models.attendance import (
+from src.models.attendance import (
     StudentAttendance,
     AttendanceAuditLog,
     QRCodeAttendance,
@@ -13,7 +13,7 @@ from models.attendance import (
     AttendanceNotification,
     AttendanceStatus
 )
-from schemas.attendance import (
+from src.schemas.attendance import (
     StudentAttendanceCreate,
     OfflineAttendanceRecord,
     OfflineAttendanceSyncCreate,

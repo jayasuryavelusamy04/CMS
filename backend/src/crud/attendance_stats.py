@@ -3,10 +3,10 @@ from sqlalchemy import func, and_, between
 from datetime import date, timedelta
 from typing import List, Optional
 
-from ..models.attendance import Attendance
-from ..schemas import attendance_stats as schemas
+from src.models.attendance import StudentAttendance
+from src.schemas import attendance_stats as schemas
 
-def calculate_attendance_stats(records: List[Attendance]) -> schemas.AttendanceStats:
+def calculate_attendance_stats(records: List[StudentAttendance]) -> schemas.AttendanceStats:
     total = len(records)
     if total == 0:
         return schemas.AttendanceStats(

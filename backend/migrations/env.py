@@ -5,7 +5,7 @@ from sqlalchemy import engine_from_config, pool
 from alembic import context
 
 from src.models import *  # This will import all models
-from src.core.database import Base
+from src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.src.core.database import Base
 from src.core.config import settings
 
 # Load environment variables

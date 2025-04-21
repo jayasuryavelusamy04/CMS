@@ -1,3 +1,1 @@
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
+from src.core.database import Base  # Updated import path

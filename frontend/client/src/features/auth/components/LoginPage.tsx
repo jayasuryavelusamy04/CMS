@@ -40,7 +40,7 @@ export const LoginPage: React.FC = () => {
             background: '#f0f2f5'
         }}>
             <Card
-                title="School Management System"
+                title="Campus Management System"
                 style={{ width: 400 }}
                 headStyle={{ textAlign: 'center' }}
             >

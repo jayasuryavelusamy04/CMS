@@ -1,33 +1,22 @@
-from typing import AsyncGenerator, Generator
+from typing import Generator, Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt
+from jose import jwt, JWTError
 from sqlalchemy.orm import Session
+from pydantic import ValidationError
 
-from .database import SessionLocal
-from .security import verify_token
-from .models import User
-from .config import settings
+from src.core.config import settings
+from src.core.database import SessionLocal
+from src.crud.auth import auth_crud
+from src.schemas.auth import TokenPayload
+from src.models.student import Student
+from src.models.staff import Staff
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl=f"{settings.API_V1_STR}/auth/login"
+)
 
-async def get_current_user_id(token: str = Depends(oauth2_scheme)) -> int:
-    """Get current user ID from JWT token."""
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        user_id = verify_token(token)
-        if user_id is None:
-            raise credentials_exception
-        return user_id
-    except jwt.JWTError:
-        raise credentials_exception
-
-def get_db() -> Generator[Session, None, None]:
-    """FastAPI dependency that provides a database session."""
+def get_db() -> Generator:
     db = SessionLocal()
     try:
         yield db
@@ -35,54 +24,53 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 async def get_current_user(
-    db: Session = Depends(get_db),
-    user_id: int = Depends(get_current_user_id)
-) -> User:
-    """Get current user from database."""
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+    db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
+) -> Optional[Student | Staff]:
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
+        token_data = TokenPayload(**payload)
+    except (JWTError, ValidationError):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+        )
+    
+    user = None
+    role = payload.get("role")
+    if role == "student":
+        user = db.query(Student).filter(Student.id == token_data.sub).first()
+    elif role in ["teacher", "admin", "accountant", "librarian"]:
+        user = db.query(Staff).filter(Staff.id == token_data.sub).first()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
     return user
 
-class RoleChecker:
-    """Dependency for checking user roles."""
-    def __init__(self, allowed_roles: list[str]):
-        self.allowed_roles = allowed_roles
+def get_current_active_user(
+    current_user: Student | Staff = Depends(get_current_user),
+) -> Student | Staff:
+    if not current_user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
 
-    def __call__(self, user_role: str) -> bool:
-        if user_role not in self.allowed_roles:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Operation not permitted"
-            )
-        return True
+def get_current_active_staff(
+    current_user: Staff = Depends(get_current_user),
+) -> Staff:
+    if not isinstance(current_user, Staff):
+        raise HTTPException(
+            status_code=403,
+            detail="The user doesn't have enough privileges"
+        )
+    return current_user
 
-# Role-based access control dependencies
-allow_admin = RoleChecker(["admin"])
-allow_admin_or_staff = RoleChecker(["admin", "staff"])
-allow_admin_or_teacher = RoleChecker(["admin", "teacher"])
-allow_all = RoleChecker(["admin", "staff", "teacher", "student", "parent"])
-
-# Common response models and exceptions
-class NotFoundError(HTTPException):
-    """Raised when a resource is not found."""
-    def __init__(self, detail: str = "Resource not found"):
-        super().__init__(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
-
-class ForbiddenError(HTTPException):
-    """Raised when a user doesn't have permission to access a resource."""
-    def __init__(self, detail: str = "Access forbidden"):
-        super().__init__(status_code=status.HTTP_403_FORBIDDEN, detail=detail)
-
-class ValidationError(HTTPException):
-    """Raised when input validation fails."""
-    def __init__(self, detail: str = "Validation error"):
-        super().__init__(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=detail)
-
-class ConflictError(HTTPException):
-    """Raised when there's a conflict with existing data."""
-    def __init__(self, detail: str = "Resource already exists"):
-        super().__init__(status_code=status.HTTP_409_CONFLICT, detail=detail)
+def get_current_active_admin(
+    current_user: Staff = Depends(get_current_active_staff),
+) -> Staff:
+    if current_user.role.value != "admin":
+        raise HTTPException(
+            status_code=403,
+            detail="The user doesn't have enough privileges"
+        )
+    return current_user

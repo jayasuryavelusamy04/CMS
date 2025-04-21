@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean, Enum, JSON, Float
 from sqlalchemy.orm import relationship
-from core.database import Base
+from src.core.database import Base
 import enum
 
 class AttendanceStatus(str, enum.Enum):

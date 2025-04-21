@@ -1,42 +1,49 @@
-from typing import Optional
+from sqlalchemy import text
+import logging
 from sqlalchemy.orm import Session
+from datetime import datetime
 
-from core.models import User, UserRole
-from core.security import get_password_hash
-from core.config import settings
-from core.database import SessionLocal, Base, engine
+from src.core.database import Base, engine, SessionLocal
+from src.core.config import settings
+from src.core.security import get_password_hash
+# Import all models to ensure they are registered
+from src import models  # noqa: F401
+from src.models.staff import Staff, StaffRole
 
-def init_db(db: Session) -> None:
-    """Initialize the database with default admin user"""
-    # Check if admin user already exists
-    admin = db.query(User).filter(
-        User.email == settings.FIRST_ADMIN_EMAIL
-    ).first()
-    
-    if not admin:
-        admin = User(
-            username="admin",
-            email=settings.FIRST_ADMIN_EMAIL,
-            full_name="System Administrator",
-            hashed_password=get_password_hash(settings.FIRST_ADMIN_PASSWORD),
-            role=UserRole.ADMIN,
-            is_active=True
-        )
-        db.add(admin)
-        db.commit()
-        print(f"Created default admin user with email: {settings.FIRST_ADMIN_EMAIL}")
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-def ensure_admin_exists() -> None:
-    """Ensure that at least one admin user exists in the database."""
-    db = SessionLocal()
+def init_db() -> None:
     try:
-        init_db(db)
-    finally:
-        db.close()
+        # Create all tables
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database tables created successfully")
+        
+        # Create initial admin user if it doesn't exist
+        db = SessionLocal()
+        try:
+            create_initial_admin(db)
+        finally:
+            db.close()
+            
+    except Exception as e:
+        logger.error(f"Error initializing database: {str(e)}")
+        raise
 
-if __name__ == "__main__":
-    # Create database tables if they don't exist
-    # Note: In production, use Alembic migrations instead
-    Base.metadata.create_all(bind=engine)
-    ensure_admin_exists()
-    print("Database initialization completed")
+def create_initial_admin(db: Session) -> None:
+    # Check if admin user already exists
+    admin = db.query(Staff).filter(Staff.email == settings.FIRST_SUPERUSER).first()
+    if not admin:
+        admin_in = Staff(
+            email=settings.FIRST_SUPERUSER,
+            name="Administrator",
+            hashed_password=get_password_hash(settings.FIRST_SUPERUSER_PASSWORD),
+            role=StaffRole.ADMIN,
+            is_active=True,
+            hire_date=datetime.utcnow()
+        )
+        db.add(admin_in)
+        db.commit()
+        logger.info("Initial admin user created")
+    else:
+        logger.info("Admin user already exists")
