@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import 'ag-grid-community/styles/ag-grid.css';
+@import 'ag-grid-community/styles/ag-theme-alpine.css';
+
+/* Import Ant Design styles */
+@import 'antd/dist/reset.css';
+
+/* Custom styles */
+.ag-theme-alpine {
+    --ag-header-height: 40px;
+    --ag-header-foreground-color: #262626;
+    --ag-header-background-color: #fafafa;
+    --ag-header-cell-hover-background-color: #f0f0f0;
+    --ag-header-cell-moving-background-color: #f0f0f0;
+}
+
+.ag-theme-alpine .ag-header {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.ag-theme-alpine .ag-cell {
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.ant-form-item {
+    margin-bottom: 16px;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 16px;
+}
