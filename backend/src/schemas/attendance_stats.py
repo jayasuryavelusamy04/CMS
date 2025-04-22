@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from datetime import date
 from typing import Optional, List
 from enum import Enum
+from ..models.attendance import AttendanceStatus
 
 class StatsTimeFrame(str, Enum):
     DAILY = "daily"
@@ -27,15 +28,24 @@ class AttendanceStatsRequest(BaseModel):
 
 class DailyAttendance(BaseModel):
     date: date
-    status: str
+    status: AttendanceStatus
+
+    class Config:
+        from_attributes = True
 
 class StudentAttendanceReport(BaseModel):
     student_id: int
     total_stats: AttendanceStats
     daily_records: List[DailyAttendance]
 
+    class Config:
+        from_attributes = True
+
 class ClassAttendanceReport(BaseModel):
     class_id: int
     subject_id: Optional[int]
     total_stats: AttendanceStats
     student_stats: List[StudentAttendanceReport]
+
+    class Config:
+        from_attributes = True

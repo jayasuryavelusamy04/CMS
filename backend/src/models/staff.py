@@ -4,7 +4,7 @@ from sqlalchemy.sql import func
 import enum
 from datetime import datetime
 
-from src.core.database import Base  # Updated import path
+from .base import Base
 
 class StaffRole(enum.Enum):
     TEACHER = "teacher"
@@ -33,4 +33,5 @@ class Staff(Base):
 
     # Relationships
     teaching_assignments = relationship("TeachingAssignment", back_populates="staff")
-    teaching_slots = relationship("TimetableSlot", back_populates="teaching_staff")
+    teaching_slots = relationship("TimetableSlot", back_populates="teacher")
+    marked_attendances = relationship("Attendance", back_populates="teacher", foreign_keys="[Attendance.marked_by]")

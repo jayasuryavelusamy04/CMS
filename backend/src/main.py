@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.core.config import settings
-from src.core.init_db import init_db
-from src.api import router
+from .core.config import settings
+from .core.init_db import init_db
+from .api import router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

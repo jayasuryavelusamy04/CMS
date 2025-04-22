@@ -2,9 +2,9 @@ from typing import List, Optional
 from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from core.deps import get_db, get_current_user
-from crud.student_profile import student_profile
-from schemas.student_profile import (
+from ...core.deps import get_db, get_current_user
+from ...crud.student_profile import student_profile
+from ...schemas.student_profile import (
     StudentProfileCreate,
     StudentProfileUpdate,
     StudentProfileResponse,

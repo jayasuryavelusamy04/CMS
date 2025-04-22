@@ -3,11 +3,10 @@ from sqlalchemy.orm import Session
 from typing import List
 from datetime import date
 
-from src.core.deps import get_db
-from src.crud import attendance_stats as crud
-from src.schemas import attendance_stats as schemas
-from src.core.deps import get_current_user, get_current_active_user
-from src.models.user import User
+from ...core.deps import get_db, get_current_user, get_current_active_user
+from ...crud import attendance_stats as crud
+from ...schemas import attendance_stats as schemas
+from ...core.models import User, UserRole
 
 router = APIRouter(
     prefix="/attendance-stats",

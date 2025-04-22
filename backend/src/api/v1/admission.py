@@ -1,11 +1,11 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
-from src.core.deps import get_db, get_current_user
-from src.schemas.student import StudentCreate, Student, StudentUpdate, StudentBase
-from src.schemas.student_document import StudentDocumentCreate, StudentDocumentResponse
-from src.crud.student import student
-from src.models.student import AdmissionStatus
+from ...core.deps import get_db, get_current_user
+from ...schemas.student import StudentCreate, Student, StudentUpdate, StudentBase
+from ...schemas.student_document import StudentDocumentCreate, StudentDocumentResponse
+from ...crud.student import student
+from ...models.student import AdmissionStatus
 import json
 
 router = APIRouter()

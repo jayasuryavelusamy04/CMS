@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, E
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from src.core.database import Base
+from .base import Base
 
 class AdmissionStatus(str, enum.Enum):
     PENDING = "pending"
@@ -34,3 +34,4 @@ class Student(Base):
     class_section = relationship("ClassSection", back_populates="students")
     profile = relationship("StudentProfile", back_populates="student", uselist=False)
     fee_payments = relationship("FeePayment", back_populates="student")
+    attendances = relationship("Attendance", back_populates="student")

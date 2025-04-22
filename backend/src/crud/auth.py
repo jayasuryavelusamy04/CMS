@@ -3,10 +3,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from datetime import datetime
 
-from src.models.student import Student
-from src.models.staff import Staff
-from src.schemas.auth import UserCreate, UserUpdate
-from src.core.security import get_password_hash, verify_password
+from ..models.student import Student
+from ..models.staff import Staff
+from ..schemas.auth import UserCreate, UserUpdate
+from ..core.security import get_password_hash, verify_password
 
 class CRUDAuth:
     def authenticate(

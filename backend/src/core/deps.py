@@ -5,12 +5,12 @@ from jose import jwt, JWTError
 from sqlalchemy.orm import Session
 from pydantic import ValidationError
 
-from src.core.config import settings
-from src.core.database import SessionLocal
-from src.crud.auth import auth_crud
-from src.schemas.auth import TokenPayload
-from src.models.student import Student
-from src.models.staff import Staff
+from .config import settings
+from .database import SessionLocal
+from ..crud.auth import auth_crud
+from ..schemas.auth import TokenPayload
+from ..models.student import Student
+from ..models.staff import Staff
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/auth/login"

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
-from models.teacher_schedule import DayOfWeek
+from ..models.teacher_schedule import DayOfWeek
 
 class TeacherAvailabilityBase(BaseModel):
     teacher_id: int
@@ -18,7 +18,7 @@ class TeacherAvailability(TeacherAvailabilityBase):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class LeaveRequestBase(BaseModel):
     teacher_id: int
@@ -41,7 +41,7 @@ class LeaveRequest(LeaveRequestBase):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class SubstitutionBase(BaseModel):
     original_teacher_id: int
@@ -65,7 +65,7 @@ class Substitution(SubstitutionBase):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class RoomAllocationBase(BaseModel):
     room_number: str
@@ -84,7 +84,7 @@ class RoomAllocation(RoomAllocationBase):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class RoomScheduleBase(BaseModel):
     room_id: int
@@ -104,7 +104,7 @@ class RoomSchedule(RoomScheduleBase):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Response Schemas for aggregated data
 class TeacherScheduleResponse(BaseModel):

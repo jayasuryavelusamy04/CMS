@@ -2,9 +2,9 @@ from datetime import time, datetime
 from typing import Optional
 from sqlalchemy.orm import Session
 
-from src.models.staff import Staff
-from src.schemas.staff import StaffCreate, StaffUpdate
-from src.crud.base import CRUDBase
+from ..models.staff import Staff
+from ..schemas.staff import StaffCreate, StaffUpdate
+from .base import CRUDBase
 
 class CRUDStaff(CRUDBase[Staff, StaffCreate, StaffUpdate]):
     def get_by_email(self, db: Session, *, email: str) -> Optional[Staff]:

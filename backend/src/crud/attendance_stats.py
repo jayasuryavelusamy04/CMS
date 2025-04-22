@@ -3,8 +3,8 @@ from sqlalchemy import func, and_, between
 from datetime import date, timedelta
 from typing import List, Optional
 
-from src.models.attendance import StudentAttendance
-from src.schemas import attendance_stats as schemas
+from ..models.attendance import StudentAttendance
+from ..schemas import attendance_stats as schemas
 
 def calculate_attendance_stats(records: List[StudentAttendance]) -> schemas.AttendanceStats:
     total = len(records)
@@ -39,15 +39,15 @@ def get_student_attendance_stats(
     end_date: date,
     subject_id: Optional[int] = None
 ) -> schemas.StudentAttendanceReport:
-    query = db.query(Attendance).filter(
+    query = db.query(StudentAttendance).filter(
         and_(
-            Attendance.student_id == student_id,
-            between(Attendance.date, start_date, end_date)
+            StudentAttendance.student_id == student_id,
+            between(StudentAttendance.date, start_date, end_date)
         )
     )
 
     if subject_id:
-        query = query.filter(Attendance.subject_id == subject_id)
+        query = query.filter(StudentAttendance.subject_id == subject_id)
 
     records = query.all()
     stats = calculate_attendance_stats(records)
@@ -73,15 +73,15 @@ def get_class_attendance_stats(
     end_date: date,
     subject_id: Optional[int] = None
 ) -> schemas.ClassAttendanceReport:
-    query = db.query(Attendance).filter(
+    query = db.query(StudentAttendance).filter(
         and_(
-            Attendance.class_section_id == class_id,
-            between(Attendance.date, start_date, end_date)
+            StudentAttendance.class_section_id == class_id,
+            between(StudentAttendance.date, start_date, end_date)
         )
     )
 
     if subject_id:
-        query = query.filter(Attendance.subject_id == subject_id)
+        query = query.filter(StudentAttendance.subject_id == subject_id)
 
     records = query.all()
     

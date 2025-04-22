@@ -1,17 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Union
 from datetime import datetime, date
-from core.deps import get_db, get_current_user
-from crud.timetable import period, timetable_slot, attendance, timetable_config
-from schemas.timetable import (
+from ...core.deps import get_db, get_current_user
+from ...models.staff import Staff
+from ...models.student import Student
+from ...crud.timetable import period, timetable_slot, attendance, timetable_config
+from ...schemas.timetable import (
     Period, PeriodCreate, PeriodUpdate, PeriodList,
     TimetableSlot, TimetableSlotCreate, TimetableSlotUpdate, TimetableSlotList,
     Attendance, AttendanceCreate, AttendanceUpdate, AttendanceList,
     TimetableConfig, TimetableConfigCreate, TimetableConfigList,
     AttendanceReport, AttendanceReportParams
 )
-from schemas.auth import User
 
 router = APIRouter()
 
@@ -21,9 +22,9 @@ def create_period(
     *,
     db: Session = Depends(get_db),
     period_in: PeriodCreate,
-    current_user: User = Depends(get_current_user)
+    current_user: Union[Student, Staff] = Depends(get_current_user)
 ):
-    if not current_user.is_admin:
+    if not isinstance(current_user, Staff) or current_user.role.value != "admin":
         raise HTTPException(status_code=403, detail="Not enough permissions")
     
     # Check for period overlap
@@ -42,7 +43,7 @@ def create_period(
 def get_periods(
     class_section_id: int = Query(...),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Union[Student, Staff] = Depends(get_current_user)
 ):
     periods = period.get_by_class_section(db, class_section_id)
     return {"total": len(periods), "items": periods}
@@ -53,9 +54,9 @@ def create_timetable_slot(
     *,
     db: Session = Depends(get_db),
     slot_in: TimetableSlotCreate,
-    current_user: User = Depends(get_current_user)
+    current_user: Union[Student, Staff] = Depends(get_current_user)
 ):
-    if not current_user.is_admin:
+    if not isinstance(current_user, Staff) or current_user.role.value != "admin":
         raise HTTPException(status_code=403, detail="Not enough permissions")
     
     # Check for teacher conflict
@@ -71,7 +72,7 @@ def create_timetable_slot(
 def get_timetable_slots(
     class_section_id: int = Query(...),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Union[Student, Staff] = Depends(get_current_user)
 ):
     slots = timetable_slot.get_by_class_section(db, class_section_id)
     return {"total": len(slots), "items": slots}
@@ -82,9 +83,9 @@ def create_attendance(
     *,
     db: Session = Depends(get_db),
     attendance_in: AttendanceCreate,
-    current_user: User = Depends(get_current_user)
+    current_user: Union[Student, Staff] = Depends(get_current_user)
 ):
-    if not current_user.is_teacher and not current_user.is_admin:
+    if not isinstance(current_user, Staff) or (current_user.role.value != "teacher" and current_user.role.value != "admin"):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     
     return attendance.create(db=db, obj_in=attendance_in)
@@ -96,7 +97,7 @@ def get_attendance(
     start_date: date = Query(...),
     end_date: date = Query(...),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Union[Student, Staff] = Depends(get_current_user)
 ):
     attendance_records = attendance.get_student_attendance(
         db,
@@ -111,9 +112,9 @@ def generate_attendance_report(
     *,
     db: Session = Depends(get_db),
     params: AttendanceReportParams,
-    current_user: User = Depends(get_current_user)
+    current_user: Union[Student, Staff] = Depends(get_current_user)
 ):
-    if not current_user.is_teacher and not current_user.is_admin:
+    if not isinstance(current_user, Staff) or (current_user.role.value != "teacher" and current_user.role.value != "admin"):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     
     return attendance.generate_report(db=db, params=params)
@@ -124,9 +125,9 @@ def create_timetable_config(
     *,
     db: Session = Depends(get_db),
     config_in: TimetableConfigCreate,
-    current_user: User = Depends(get_current_user)
+    current_user: Union[Student, Staff] = Depends(get_current_user)
 ):
-    if not current_user.is_admin:
+    if not isinstance(current_user, Staff) or current_user.role.value != "admin":
         raise HTTPException(status_code=403, detail="Not enough permissions")
     
     return timetable_config.create(db=db, obj_in=config_in)
@@ -135,7 +136,7 @@ def create_timetable_config(
 def get_timetable_configs(
     class_section_id: int = Query(...),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Union[Student, Staff] = Depends(get_current_user)
 ):
     configs = timetable_config.get_by_class_section(db, class_section_id)
     return {"total": len(configs), "items": configs}
@@ -146,9 +147,9 @@ async def create_bulk_attendance(
     *,
     db: Session = Depends(get_db),
     attendances: List[AttendanceCreate],
-    current_user: User = Depends(get_current_user)
+    current_user: Union[Student, Staff] = Depends(get_current_user)
 ):
-    if not current_user.is_teacher and not current_user.is_admin:
+    if not isinstance(current_user, Staff) or (current_user.role.value != "teacher" and current_user.role.value != "admin"):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     
     result = []
@@ -160,9 +161,9 @@ async def create_bulk_attendance(
 async def validate_timetable(
     class_section_id: int = Query(...),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Union[Student, Staff] = Depends(get_current_user)
 ):
-    if not current_user.is_admin:
+    if not isinstance(current_user, Staff) or current_user.role.value != "admin":
         raise HTTPException(status_code=403, detail="Not enough permissions")
     
     # Implement validation logic here

@@ -4,7 +4,7 @@ from sqlalchemy import and_, or_
 from datetime import datetime
 from fastapi.encoders import jsonable_encoder
 
-from models.teacher_schedule import (
+from ..models.teacher_schedule import (
     TeacherAvailability,
     LeaveRequest,
     Substitution,
@@ -12,7 +12,7 @@ from models.teacher_schedule import (
     RoomSchedule,
     DayOfWeek
 )
-from schemas.teacher_schedule import (
+from ..schemas.teacher_schedule import (
     TeacherAvailabilityCreate,
     LeaveRequestCreate,
     LeaveRequestUpdate,

@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 from datetime import datetime, date
 
-from core.deps import get_db
-from schemas.teacher_schedule import (
+from ...core.deps import get_db
+from ...schemas.teacher_schedule import (
     TeacherAvailability,
     TeacherAvailabilityCreate,
     LeaveRequest,
@@ -19,7 +19,7 @@ from schemas.teacher_schedule import (
     TeacherScheduleResponse,
     RoomScheduleResponse
 )
-import crud.teacher_schedule as crud
+from ...crud import teacher_schedule as crud
 
 router = APIRouter()
 

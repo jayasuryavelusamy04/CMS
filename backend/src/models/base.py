@@ -1,1 +1,1 @@
-from src.core.database import Base  # Updated import path
+from ..core.database import Base

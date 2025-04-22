@@ -6,6 +6,7 @@ import enum
 
 class Period(Base):
     __tablename__ = "periods"
+    __table_args__ = {'extend_existing': True}
     
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(50), nullable=False)  # e.g., "Period 1"
@@ -23,6 +24,7 @@ class Period(Base):
 
 class TimetableSlot(Base):
     __tablename__ = "timetable_slots"
+    __table_args__ = {'extend_existing': True}
     
     id = Column(Integer, primary_key=True, index=True)
     period_id = Column(Integer, ForeignKey("periods.id"), nullable=False)
@@ -37,33 +39,11 @@ class TimetableSlot(Base):
     period = relationship("Period", back_populates="timetable_slots")
     subject = relationship("Subject")
     teacher = relationship("Staff")
-
-class AttendanceStatus(str, enum.Enum):
-    PRESENT = "present"
-    ABSENT = "absent"
-    LATE = "late"
-    EXCUSED = "excused"
-
-class Attendance(Base):
-    __tablename__ = "attendance"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
-    timetable_slot_id = Column(Integer, ForeignKey("timetable_slots.id"), nullable=False)
-    status = Column(Enum(AttendanceStatus), nullable=False)
-    note = Column(Text)
-    marked_by = Column(Integer, ForeignKey("staff.id"), nullable=False)
-    date = Column(DateTime, nullable=False)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, onupdate=func.now())
-
-    # Relationships
-    student = relationship("Student")
-    timetable_slot = relationship("TimetableSlot")
-    teacher = relationship("Staff", foreign_keys=[marked_by])
+    attendances = relationship("Attendance", back_populates="timetable_slot")
 
 class TimetableConfig(Base):
     __tablename__ = "timetable_config"
+    __table_args__ = {'extend_existing': True}
     
     id = Column(Integer, primary_key=True, index=True)
     academic_year = Column(String(20), nullable=False)
@@ -79,6 +59,7 @@ class TimetableConfig(Base):
 
 class TimetableChangeLog(Base):
     __tablename__ = "timetable_change_log"
+    __table_args__ = {'extend_existing': True}
     
     id = Column(Integer, primary_key=True, index=True)
     timetable_slot_id = Column(Integer, ForeignKey("timetable_slots.id"), nullable=False)

@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_, func
+from sqlalchemy import and_, or_, func, case
 from datetime import datetime, time
 from typing import List, Optional
-from models.timetable import Period, TimetableSlot, Attendance, TimetableConfig, TimetableChangeLog
-from schemas.timetable import (
+from ..models.timetable import Period, TimetableSlot, Attendance, TimetableConfig, TimetableChangeLog
+from ..schemas.timetable import (
     PeriodCreate, PeriodUpdate,
     TimetableSlotCreate, TimetableSlotUpdate,
     AttendanceCreate, AttendanceUpdate,

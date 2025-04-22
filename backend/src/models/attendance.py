@@ -1,120 +1,96 @@
-from datetime import datetime
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean, Enum, JSON, Float
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Text, Boolean, JSON, Float
 from sqlalchemy.orm import relationship
-from src.core.database import Base
+from sqlalchemy.sql import func
+from .base import Base
 import enum
 
-class AttendanceStatus(str, enum.Enum):
-    PRESENT = "PRESENT"
-    ABSENT = "ABSENT"
-    LATE = "LATE"
-    ON_LEAVE = "ON_LEAVE"
-
 class AttendanceMarkingMethod(str, enum.Enum):
-    MANUAL = "MANUAL"
-    QR_CODE = "QR_CODE"
-    GEOLOCATION = "GEOLOCATION"
-    OFFLINE_SYNC = "OFFLINE_SYNC"
+    MANUAL = "manual"
+    QR_CODE = "qr_code"
+    BIOMETRIC = "biometric"
+
+class AttendanceStatus(str, enum.Enum):
+    PRESENT = "present"
+    ABSENT = "absent"
+    LATE = "late"
+    EXCUSED = "excused"
 
 class StudentAttendance(Base):
-    __tablename__ = "student_attendance"
-
+    __tablename__ = "student_attendances"
+    __table_args__ = {'extend_existing': True}
+    
     id = Column(Integer, primary_key=True, index=True)
-    student_id = Column(Integer, ForeignKey("students.id"))
-    class_section_id = Column(Integer, ForeignKey("class_sections.id"))
-    subject_id = Column(Integer, ForeignKey("subjects.id"))
-    teacher_id = Column(Integer, ForeignKey("staff.id"))
-    date = Column(DateTime)
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
+    student_profile_id = Column(Integer, ForeignKey("student_profiles.id"), nullable=True)
+    timetable_slot_id = Column(Integer, ForeignKey("timetable_slots.id"), nullable=True)
+    status = Column(Enum(AttendanceStatus), nullable=False)
+    date = Column(DateTime, nullable=False)
+    note = Column(Text)
+    marked_by = Column(Integer, ForeignKey("staff.id"), nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, onupdate=func.now())
     period_number = Column(Integer)
-    status = Column(Enum(AttendanceStatus))
-    marking_method = Column(Enum(AttendanceMarkingMethod))
-    marked_at = Column(DateTime, default=datetime.utcnow)
-    remarks = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    sync_id = Column(String, nullable=True)  # For offline sync tracking
-
+    subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=True)
+    
     # Relationships
-    student = relationship("Student", back_populates="attendance_records")
-    class_section = relationship("ClassSection")
-    subject = relationship("Subject")
-    teacher = relationship("Staff")
-    audit_logs = relationship("AttendanceAuditLog", back_populates="attendance")
+    student = relationship("Student", back_populates="attendances")
+    student_profile = relationship("StudentProfile", back_populates="attendances")
+    timetable_slot = relationship("TimetableSlot", back_populates="attendances")
+    teacher = relationship("Staff", foreign_keys=[marked_by])
 
 class AttendanceAuditLog(Base):
     __tablename__ = "attendance_audit_logs"
-
+    
     id = Column(Integer, primary_key=True, index=True)
-    attendance_id = Column(Integer, ForeignKey("student_attendance.id"))
-    modified_by = Column(Integer, ForeignKey("staff.id"))
-    old_status = Column(Enum(AttendanceStatus))
-    new_status = Column(Enum(AttendanceStatus))
-    action = Column(String)  # CREATE, UPDATE, DELETE
-    reason = Column(String)
+    attendance_id = Column(Integer, ForeignKey("student_attendances.id"), nullable=False)
+    modified_by = Column(Integer, ForeignKey("staff.id"), nullable=False)
+    old_status = Column(Enum(AttendanceStatus), nullable=True)
+    new_status = Column(Enum(AttendanceStatus), nullable=False)
+    action = Column(String, nullable=False)
+    reason = Column(Text)
     ip_address = Column(String)
     user_agent = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-    # Relationships
-    attendance = relationship("StudentAttendance", back_populates="audit_logs")
-    modifier = relationship("Staff")
+    created_at = Column(DateTime, server_default=func.now())
 
 class QRCodeAttendance(Base):
-    __tablename__ = "qr_code_attendance"
-
+    __tablename__ = "qr_code_attendances"
+    
     id = Column(Integer, primary_key=True, index=True)
-    attendance_id = Column(Integer, ForeignKey("student_attendance.id"))
-    qr_code = Column(String, unique=True)
-    scanned_at = Column(DateTime)
-    device_info = Column(JSON)
+    qr_code = Column(String, nullable=False)
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
     is_valid = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-    # Relationships
-    attendance = relationship("StudentAttendance")
+    scanned_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
 
 class GeolocationAttendance(Base):
-    __tablename__ = "geolocation_attendance"
-
+    __tablename__ = "geolocation_attendances"
+    
     id = Column(Integer, primary_key=True, index=True)
-    attendance_id = Column(Integer, ForeignKey("student_attendance.id"))
-    latitude = Column(Float)
-    longitude = Column(Float)
-    accuracy = Column(Float)
-    device_info = Column(JSON)
-    is_within_bounds = Column(Boolean)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-    # Relationships
-    attendance = relationship("StudentAttendance")
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
+    is_within_bounds = Column(Boolean, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
 
 class OfflineAttendanceSync(Base):
-    __tablename__ = "offline_attendance_sync"
-
+    __tablename__ = "offline_attendance_syncs"
+    
     id = Column(Integer, primary_key=True, index=True)
-    sync_id = Column(String, unique=True)
-    device_id = Column(String)
-    sync_data = Column(JSON)  # Holds attendance records in JSON format
-    sync_status = Column(String)  # PENDING, SYNCED, FAILED
-    synced_at = Column(DateTime, nullable=True)
+    sync_id = Column(String, nullable=False, unique=True)
+    sync_data = Column(JSON, nullable=False)
+    sync_status = Column(String, nullable=False)
     error_details = Column(JSON, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    synced_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
 
 class AttendanceNotification(Base):
     __tablename__ = "attendance_notifications"
-
+    
     id = Column(Integer, primary_key=True, index=True)
-    student_id = Column(Integer, ForeignKey("students.id"))
-    attendance_id = Column(Integer, ForeignKey("student_attendance.id"))
-    notification_type = Column(String)  # SMS, EMAIL, PUSH
-    status = Column(String)  # PENDING, SENT, FAILED
-    content = Column(String)
-    error_message = Column(String, nullable=True)
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
+    message = Column(Text, nullable=False)
+    notification_type = Column(String, nullable=False)
+    status = Column(String, nullable=False)
+    error_message = Column(Text, nullable=True)
     sent_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    # Relationships
-    student = relationship("Student")
-    attendance = relationship("StudentAttendance")
+    created_at = Column(DateTime, server_default=func.now())

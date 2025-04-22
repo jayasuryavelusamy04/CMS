@@ -1,13 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Float, DateTime, Enum
+from sqlalchemy import Column, Integer, String, ForeignKey, Float, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from src.core.database import Base  # Updated import path
-import enum
-
-class AttendanceStatus(enum.Enum):
-    PRESENT = "present"
-    ABSENT = "absent"
-    LATE = "late"
+from .base import Base
 
 class StudentProfile(Base):
     __tablename__ = "student_profiles"
@@ -25,21 +19,6 @@ class StudentProfile(Base):
     student = relationship("Student", back_populates="profile")
     attendances = relationship("Attendance", back_populates="student_profile")
     marks = relationship("Mark", back_populates="student_profile")
-
-class Attendance(Base):
-    __tablename__ = "attendances"
-    __table_args__ = {'extend_existing': True}  # Allow table redefinition
-    
-    id = Column(Integer, primary_key=True, index=True)
-    student_profile_id = Column(Integer, ForeignKey("student_profiles.id"), nullable=False)
-    date = Column(DateTime, nullable=False)
-    status = Column(Enum(AttendanceStatus), nullable=False)
-    remarks = Column(String(200))
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, onupdate=func.now())
-    
-    # Relationships
-    student_profile = relationship("StudentProfile", back_populates="attendances")
 
 class Mark(Base):
     __tablename__ = "marks"

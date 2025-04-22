@@ -2,9 +2,9 @@ from typing import List, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from src.core.deps import get_db, get_current_user
-from src.crud.staff import staff
-from src.schemas.staff import (
+from ...core.deps import get_db, get_current_user
+from ...crud.staff import staff
+from ...schemas.staff import (
     StaffCreate,
     StaffUpdate,
     StaffResponse,

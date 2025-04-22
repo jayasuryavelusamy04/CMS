@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy.orm import Session
 from datetime import datetime, date
 
-from src.core.deps import get_db, get_current_user
-from src.schemas.attendance import (
+from ...core.deps import get_db, get_current_user
+from ...schemas.attendance import (
     StudentAttendance,
     StudentAttendanceCreate,
     QRCodeAttendance,
@@ -19,7 +19,7 @@ from src.schemas.attendance import (
     ClassAttendanceSummary,
     SubjectAttendanceReport
 )
-import src.crud.attendance as crud
+from ...crud import attendance as crud
 
 router = APIRouter()
 

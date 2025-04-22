@@ -2,7 +2,7 @@ from typing import Optional, List
 from datetime import datetime
 from pydantic import BaseModel
 
-from src.models.student_profile import AttendanceStatus  # Updated import path
+from ..models.attendance import AttendanceStatus
 
 class StudentProfileBase(BaseModel):
     student_id: int
@@ -74,3 +74,25 @@ class MarkInDB(MarkBase):
 
 class Mark(MarkInDB):
     pass
+
+# Response models for API endpoints
+class StudentProfileResponse(StudentProfile):
+    pass
+
+class StudentProfileList(BaseModel):
+    total: int
+    items: List[StudentProfile]
+
+class AttendanceResponse(Attendance):
+    pass
+
+class AttendanceList(BaseModel):
+    total: int
+    items: List[Attendance]
+
+class MarkResponse(Mark):
+    pass
+
+class MarkList(BaseModel):
+    total: int
+    items: List[Mark]

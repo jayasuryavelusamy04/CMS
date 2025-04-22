@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from src.core.database import Base
+from .base import Base
 
 class TeachingAssignment(Base):
     __tablename__ = "teaching_assignments"

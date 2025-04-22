@@ -2,9 +2,9 @@ from typing import List, Optional
 from datetime import date, datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import func, case
-from models.student_profile import StudentProfile, Attendance, Mark
-from models.subject import Subject, TimetableSlot
-from schemas.student_profile import (
+from ..models.student_profile import StudentProfile, Attendance, Mark
+from ..models.subject import Subject, TimetableSlot
+from ..schemas.student_profile import (
     StudentProfileCreate,
     StudentProfileUpdate,
     AttendanceCreate,

@@ -3,12 +3,12 @@ import logging
 from sqlalchemy.orm import Session
 from datetime import datetime
 
-from src.core.database import Base, engine, SessionLocal
-from src.core.config import settings
-from src.core.security import get_password_hash
+from .database import Base, engine, SessionLocal
+from .config import settings
+from .security import get_password_hash
 # Import all models to ensure they are registered
-from src import models  # noqa: F401
-from src.models.staff import Staff, StaffRole
+from .. import models  # noqa: F401
+from ..models.staff import Staff, StaffRole
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

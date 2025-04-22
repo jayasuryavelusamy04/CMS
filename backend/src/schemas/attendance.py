@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List, Dict, Any, Union
 from pydantic import BaseModel, Field, validator
-from src.models.attendance import AttendanceStatus, AttendanceMarkingMethod
+from ..models.attendance import AttendanceStatus, AttendanceMarkingMethod
 
 class StudentAttendanceBase(BaseModel):
     student_id: int

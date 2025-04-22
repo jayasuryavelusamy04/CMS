@@ -1,32 +1,16 @@
 from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel
-from models.fees import FeeType, PaymentMode
-
-class FeeStructureBase(BaseModel):
-    class_section_id: int
-    fee_type: FeeType
-    amount: float
-    due_date: datetime
-    academic_year: str
-
-class FeeStructureCreate(FeeStructureBase):
-    pass
-
-class FeeStructure(FeeStructureBase):
-    id: int
-    created_at: datetime
-    updated_at: datetime
-
-    class Config:
-        from_attributes = True
+from ..models.fees import FeeType, PaymentStatus
 
 class FeePaymentBase(BaseModel):
     student_id: int
-    fee_structure_id: int
-    amount_paid: float
-    payment_mode: PaymentMode
-    transaction_id: Optional[str] = None
+    fee_type: FeeType
+    amount: float
+    paid_amount: float = 0
+    due_date: datetime
+    status: PaymentStatus = PaymentStatus.PENDING
+    receipt_number: Optional[str] = None
     remarks: Optional[str] = None
 
 class FeePaymentCreate(FeePaymentBase):
@@ -34,8 +18,8 @@ class FeePaymentCreate(FeePaymentBase):
 
 class FeePayment(FeePaymentBase):
     id: int
-    payment_date: datetime
-    payment_status: str
+    payment_date: Optional[datetime]
+    status: PaymentStatus
     created_at: datetime
     updated_at: datetime
 

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Time, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from src.core.database import Base  # Updated import path
+from .base import Base
 
 class Subject(Base):
     __tablename__ = "subjects"

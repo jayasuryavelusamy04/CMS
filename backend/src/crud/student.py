@@ -1,9 +1,9 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from src.models.student import Student, AdmissionStatus
-from src.schemas.student import StudentCreate, StudentUpdate
-from src.crud.base import CRUDBase
+from ..models.student import Student, AdmissionStatus
+from ..schemas.student import StudentCreate, StudentUpdate
+from .base import CRUDBase
 from fastapi.encoders import jsonable_encoder
 
 class CRUDStudent(CRUDBase[Student, StudentCreate, StudentUpdate]):
@@ -14,7 +14,7 @@ class CRUDStudent(CRUDBase[Student, StudentCreate, StudentUpdate]):
         db_obj = self.model(**obj_in_data)
         
         # Create guardians
-        from src.crud.guardian import guardian
+        from .guardian import guardian
         for guardian_data in obj_in.guardians:
             guardian_obj = guardian.create(db, obj_in=guardian_data)
             db_obj.guardians.append(guardian_obj)
