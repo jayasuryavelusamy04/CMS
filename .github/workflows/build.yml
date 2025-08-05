@@ -1,4 +1,5 @@
 name: Build
+
 on:
   push:
     branches:
@@ -10,17 +11,18 @@ jobs:
   sonarqube:
     name: SonarCloud
     runs-on: windows-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=my-org_cms
-            -Dsonar.organization=my-org
+            -Dsonar.projectKey=jayasuryavelusamy04_CMS
+            -Dsonar.organization=jayasuryavelusamy04
             -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
