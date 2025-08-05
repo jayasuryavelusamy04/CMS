@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { message } from 'antd';
 import { validatePermissions } from '../utils/validations';
 import { PermissionStatus } from '../types/attendance.types';
-
+// 
 interface UseAttendancePermissionsResult {
     permissions: PermissionStatus;
     isOnline: boolean;
